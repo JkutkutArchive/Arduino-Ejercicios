@@ -21,6 +21,17 @@ int pinHumedad=A1;
 float temperatura;
 float rh;
 
+float getTemperatura() {
+  return ( analogRead(pinTemperatura) * (500.0 / 1024.0) ) - 50.0;
+}
+
+float getRH() {
+  float adcValue = analogRead(0); // Read voltage coming from sensor (adcValue will be between 0-1023)
+  float voltage = (adcValue/1023.0)*5.0; // Translate ADC value into a voltage value
+  float percentRH = (voltage-0.958)/0.0307; // Translate voltage into percent relative humidity
+  return percentRH;
+}
+
 void setup() {
   lcd.begin(16, 2);
 
@@ -32,16 +43,13 @@ void setup() {
   pinMode(pinTemperatura, INPUT);
   pinMode(pinHumedad, INPUT);
   
-  temperatura = ( analogRead(pinTemperatura) * (500.0 / 1024.0) ) - 50.0;
-  rh = ( analogRead(pinHumedad) * (500.0 / 1024.0) ) - 50.0;
-  
   lcd.setCursor(6, 0);
-  lcd.print(temperatura);
+  lcd.print(getTemperatura(););
   lcd.setCursor(11, 0);
   lcd.print(" C");
   
   lcd.setCursor(6, 1);
-  lcd.print(rh);
+  lcd.print(getRH());
   lcd.setCursor(11, 1);
   lcd.print(" %");
   
@@ -52,17 +60,14 @@ void setup() {
   lcd.print("RH   = ");
 }
 
-void loop() {
-  temperatura = ( analogRead(pinTemperatura) * (500.0 / 1024.0) ) - 50.0;
-  rh = ( analogRead(pinHumedad) * (500.0 / 1024.0) ) - 50.0;
-  
+void loop() {  
   lcd.setCursor(7, 0);
-  lcd.print(temperatura);
+  lcd.print(getTemperatura());
   lcd.setCursor(12, 0);
   lcd.print(" C");
   
   lcd.setCursor(7, 1);
-  lcd.print(rh);
+  lcd.print(getRH());
   lcd.setCursor(12, 1);
   lcd.print(" %");
   
