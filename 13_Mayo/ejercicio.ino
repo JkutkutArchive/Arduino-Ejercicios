@@ -54,16 +54,16 @@ void setup() {
   lcd.print(" %");
   
   // delay(5000);
+  // Puesto que empieza por los lados, tenemos que borrar el mensaje anterior y empezar de 0.
   lcd.clear();
 }
 
 
 #define TEMP_STR "Temp: XX.XX C"
-#define DATA_LEN (sizeof(TEMP_STR) - 1)
-
 #define HUM_STR  "RH  : XX.XX %%"
-
+#define DATA_LEN (sizeof(TEMP_STR) - 1)
 #define DATA_OFFSET 5
+
 void printIndex() {
   static int index = -DATA_LEN;
   static int index2 = 16;
@@ -87,16 +87,16 @@ void printIndex() {
   }
 
   // humidity
-
-  // lcd.setCursor(0, 1);
+  lcd.setCursor(0, 1);
   if (index2 >= 0) {
-    lcd.setCursor(0, 1);
     for (int i = 0; i < index2; i++) {
       lcd.print(" ");
     }
     lcd.print(text[1]);
+    for (int i = index2 + DATA_LEN; i <= 16; i++) {
+      lcd.print(" ");
+    }
   } else {
-    lcd.setCursor(0, 1);
     lcd.print(text[1] - index2);
     for (int i = DATA_LEN; i <= 16; i++) {
       lcd.print(" ");
@@ -109,7 +109,6 @@ void printIndex() {
   index2--;
   if (index2 < -10)
     index2 = 16;
-  Serial.println(index2);
 }
 
 void loop() {
