@@ -15,8 +15,7 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 int pinTemperatura=A0;
 // Para el uso de tinkercad, usamos otro de temperatura. El funcionamiento
 // es equivalente.
-int pinHumedad=A1; 
-
+int pinHumedad=A1;
 
 float temperatura;
 float rh;
@@ -33,6 +32,7 @@ float getRH() {
 }
 
 void setup() {
+  Serial.begin(9600); // TODO debug
   lcd.begin(16, 2);
 
   lcd.setCursor(0,0);
@@ -44,7 +44,7 @@ void setup() {
   pinMode(pinHumedad, INPUT);
   
   lcd.setCursor(6, 0);
-  lcd.print(getTemperatura(););
+  lcd.print(getTemperatura());
   lcd.setCursor(11, 0);
   lcd.print(" C");
   
@@ -53,24 +53,54 @@ void setup() {
   lcd.setCursor(11, 1);
   lcd.print(" %");
   
-  delay(5000);
-  lcd.setCursor(0,0);
-  lcd.print("Temp = ");
-  lcd.setCursor(0, 1);
-  lcd.print("RH   = ");
+  // delay(5000);
 }
 
-void loop() {  
-  lcd.setCursor(7, 0);
-  lcd.print(getTemperatura());
-  lcd.setCursor(12, 0);
-  lcd.print(" C");
-  
-  lcd.setCursor(7, 1);
-  lcd.print(getRH());
-  lcd.setCursor(12, 1);
-  lcd.print(" %");
-  
+
+#define TEMP_STR "Temp: XX.XX C"
+#define DATA_LEN (sizeof(TEMP_STR) - 1)
+
+#define HUM_STR  "RH  : XX.XX %%"
+
+#define DATA_OFFSET 5
+void printIndex() {
+  static int index = -DATA_LEN;
+  static char *text[] = {0, 0};
+
+  if (!text[0]) {
+    text[0] = (char *) malloc(sizeof(TEMP_STR));
+    text[1] = (char *) malloc(sizeof(HUM_STR));
+    sprintf(text[0], TEMP_STR);
+    sprintf(text[1], HUM_STR);
+  }
+
+  lcd.setCursor(0, 0);
+  if (index < 0) {
+    lcd.print(text[0] - index);
+  } else {
+    for (int i = 0; i < index; i++) {
+      lcd.print(" ");
+    }
+    lcd.print(text[0]);
+  }
+
+  // lcd.setCursor(0, 1);
+  // if (index >= 0) {
+  //   lcd.print(text[1] + index + DATA_LEN);
+  // } else {
+  //   // for (int i = 0; i < index; i++) {
+  //   //   lcd.print(" ");
+  //   // }
+  //   // lcd.print(text[1]);
+  // }
+
+  index++;
+  if (index > 16)
+    index = -DATA_LEN;
+}
+
+void loop() {
+  printIndex();
   delay(100);
 }
  
