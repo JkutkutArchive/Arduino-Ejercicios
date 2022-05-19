@@ -25,7 +25,7 @@ float getTemperatura() {
 }
 
 float getRH() {
-  float adcValue = analogRead(0); // Read voltage coming from sensor (adcValue will be between 0-1023)
+  float adcValue = analogRead(pinHumedad); // Read voltage coming from sensor (adcValue will be between 0-1023)
   float voltage = (adcValue/1023.0)*5.0; // Translate ADC value into a voltage value
   float percentRH = (voltage-0.958)/0.0307; // Translate voltage into percent relative humidity
   return percentRH;
@@ -64,6 +64,22 @@ void setup() {
 #define DATA_LEN (sizeof(TEMP_STR) - 1)
 #define DATA_OFFSET 5
 
+void updateData(int data, char **dataString) {
+  int tmpInt1 = data;
+  float tmpFrac = data - tmpInt1;
+  int tmpInt2;
+  if (data < -9)
+    tmpInt2 = trunc(tmpFrac * 10);
+  else
+    tmpInt2 = trunc(tmpFrac * 100);
+
+  if (tmpInt2 < 0)
+    tmpInt2 *= -1;
+
+  sprintf((*dataString) + 6, "%d.%d", tmpInt1, tmpInt2);
+  (*dataString)[11] = ' ';
+}
+
 void printIndex() {
   static int index = -DATA_LEN;
   static int index2 = 16;
@@ -75,6 +91,37 @@ void printIndex() {
     sprintf(text[0], TEMP_STR);
     sprintf(text[1], HUM_STR);
   }
+
+  float temp = getTemperatura();
+  int tmpInt1 = temp;
+  float tmpFrac = temp - tmpInt1;
+  int tmpInt2;
+  if (temp < -9)
+    tmpInt2 = trunc(tmpFrac * 10);
+  else
+    tmpInt2 = trunc(tmpFrac * 100);
+
+  if (tmpInt2 < 0)
+    tmpInt2 *= -1;
+
+  sprintf(text[0] + 6, "%d.%d", tmpInt1, tmpInt2);
+  text[0][11] = ' ';
+
+
+  float rh = getRH();
+  tmpInt1 = rh;
+  tmpFrac = rh - tmpInt1;
+  if (temp < -9)
+    tmpInt2 = trunc(tmpFrac * 10);
+  else
+    tmpInt2 = trunc(tmpFrac * 100);
+  if (tmpInt2 < 0)
+    tmpInt2 *= -1;
+  sprintf(text[1] + 6, "%d.%d", tmpInt1, tmpInt2);
+  text[1][11] = ' ';
+
+  // updateData(getTemperatura(), &(text[0]));
+  // updateData(getRH(), &(text[1]));
 
   lcd.setCursor(0, 0);
   if (index < 0) {
