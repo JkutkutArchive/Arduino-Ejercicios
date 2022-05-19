@@ -53,7 +53,7 @@ void setup() {
   lcd.setCursor(11, 1);
   lcd.print(" %");
   
-  // delay(5000);
+  delay(5000);
   // Puesto que empieza por los lados, tenemos que borrar el mensaje anterior y empezar de 0.
   lcd.clear();
 }
@@ -64,7 +64,7 @@ void setup() {
 #define DATA_LEN (sizeof(TEMP_STR) - 1)
 #define DATA_OFFSET 5
 
-void updateData(int data, char **dataString) {
+void updateData(float data, char *dataString) {
   int tmpInt1 = data;
   float tmpFrac = data - tmpInt1;
   int tmpInt2;
@@ -76,13 +76,52 @@ void updateData(int data, char **dataString) {
   if (tmpInt2 < 0)
     tmpInt2 *= -1;
 
-  sprintf((*dataString) + 6, "%d.%d", tmpInt1, tmpInt2);
-  (*dataString)[11] = ' ';
+  sprintf(dataString + 6, "%d.%d", tmpInt1, tmpInt2);
+  dataString[11] = ' ';
 }
 
-void printIndex() {
+void printTemp(char *data) {
   static int index = -DATA_LEN;
+
+  lcd.setCursor(0, 0);
+  if (index < 0) {
+    lcd.print(data - index);
+  } else {
+    for (int i = 0; i < index; i++) {
+      lcd.print(" ");
+    }
+    lcd.print(data);
+  }
+  index++;
+  if (index > 16)
+    index = -DATA_LEN;
+}
+
+void printHR(char *data) {
   static int index2 = 16;
+
+  lcd.setCursor(0, 1);
+  if (index2 >= 0) {
+    for (int i = 0; i < index2; i++) {
+      lcd.print(" ");
+    }
+    lcd.print(data);
+    for (int i = index2 + DATA_LEN; i <= 16; i++) {
+      lcd.print(" ");
+    }
+  } else {
+    lcd.print(data - index2);
+    for (int i = DATA_LEN; i <= 16; i++) {
+      lcd.print(" ");
+    }
+  }
+
+  index2--;
+  if (index2 < -10)
+    index2 = 16;
+}
+
+void printData() {
   static char *text[] = {0, 0};
 
   if (!text[0]) {
@@ -92,74 +131,14 @@ void printIndex() {
     sprintf(text[1], HUM_STR);
   }
 
-  float temp = getTemperatura();
-  int tmpInt1 = temp;
-  float tmpFrac = temp - tmpInt1;
-  int tmpInt2;
-  if (temp < -9)
-    tmpInt2 = trunc(tmpFrac * 10);
-  else
-    tmpInt2 = trunc(tmpFrac * 100);
+  updateData(getTemperatura(), text[0]);
+  updateData(getRH(), text[1]);
 
-  if (tmpInt2 < 0)
-    tmpInt2 *= -1;
-
-  sprintf(text[0] + 6, "%d.%d", tmpInt1, tmpInt2);
-  text[0][11] = ' ';
-
-
-  float rh = getRH();
-  tmpInt1 = rh;
-  tmpFrac = rh - tmpInt1;
-  if (temp < -9)
-    tmpInt2 = trunc(tmpFrac * 10);
-  else
-    tmpInt2 = trunc(tmpFrac * 100);
-  if (tmpInt2 < 0)
-    tmpInt2 *= -1;
-  sprintf(text[1] + 6, "%d.%d", tmpInt1, tmpInt2);
-  text[1][11] = ' ';
-
-  // updateData(getTemperatura(), &(text[0]));
-  // updateData(getRH(), &(text[1]));
-
-  lcd.setCursor(0, 0);
-  if (index < 0) {
-    lcd.print(text[0] - index);
-  } else {
-    for (int i = 0; i < index; i++) {
-      lcd.print(" ");
-    }
-    lcd.print(text[0]);
-  }
-
-  // humidity
-  lcd.setCursor(0, 1);
-  if (index2 >= 0) {
-    for (int i = 0; i < index2; i++) {
-      lcd.print(" ");
-    }
-    lcd.print(text[1]);
-    for (int i = index2 + DATA_LEN; i <= 16; i++) {
-      lcd.print(" ");
-    }
-  } else {
-    lcd.print(text[1] - index2);
-    for (int i = DATA_LEN; i <= 16; i++) {
-      lcd.print(" ");
-    }
-  }
-
-  index++;
-  if (index > 16)
-    index = -DATA_LEN;
-  index2--;
-  if (index2 < -10)
-    index2 = 16;
+  printTemp(text[0]);
+  printHR(text[1]);
 }
 
 void loop() {
-  printIndex();
+  printData();
   delay(100);
 }
- 
