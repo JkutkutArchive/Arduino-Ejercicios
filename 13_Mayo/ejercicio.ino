@@ -54,6 +54,7 @@ void setup() {
   lcd.print(" %");
   
   // delay(5000);
+  lcd.clear();
 }
 
 
@@ -65,6 +66,7 @@ void setup() {
 #define DATA_OFFSET 5
 void printIndex() {
   static int index = -DATA_LEN;
+  static int index2 = 16;
   static char *text[] = {0, 0};
 
   if (!text[0]) {
@@ -84,19 +86,30 @@ void printIndex() {
     lcd.print(text[0]);
   }
 
+  // humidity
+
   // lcd.setCursor(0, 1);
-  // if (index >= 0) {
-  //   lcd.print(text[1] + index + DATA_LEN);
-  // } else {
-  //   // for (int i = 0; i < index; i++) {
-  //   //   lcd.print(" ");
-  //   // }
-  //   // lcd.print(text[1]);
-  // }
+  if (index2 >= 0) {
+    lcd.setCursor(0, 1);
+    for (int i = 0; i < index2; i++) {
+      lcd.print(" ");
+    }
+    lcd.print(text[1]);
+  } else {
+    lcd.setCursor(0, 1);
+    lcd.print(text[1] - index2);
+    for (int i = DATA_LEN; i <= 16; i++) {
+      lcd.print(" ");
+    }
+  }
 
   index++;
   if (index > 16)
     index = -DATA_LEN;
+  index2--;
+  if (index2 < -10)
+    index2 = 16;
+  Serial.println(index2);
 }
 
 void loop() {
